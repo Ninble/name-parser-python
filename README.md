@@ -42,7 +42,7 @@ If you use the name parser on a contact or registration form you can pass the IP
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if (name.fromCompleteName("Linus Benedict Torvalds")):
         print(name._gender) #Returns "m".
 except:
@@ -70,7 +70,7 @@ In this example you'll get the first, middle and lastname.
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if (name.fromCompleteName("Linus Benedict Torvalds")):
         print(name.firstname) #Returns "Linus".
         print(name.middlename) #Returns "Benedict".
@@ -88,7 +88,7 @@ We received this data from governments and statistical agencies.
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if (name.fromCompleteName("Linus Benedict Torvalds")):
         print(name.gender) #Returns "m".
         print(name.genderFormatted) #Returns "male".
@@ -105,7 +105,7 @@ The following example will parse the name "Linus Benedict Torvalds" and return t
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if (name.fromCompleteName("Linus Benedict Torvalds")):
         print(name.countryCode) #Returns "SE".
         print(name.country) #Returns "Sweden".
@@ -123,7 +123,7 @@ We also return if the email address is a personal or a business email address.
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if (name.fromEmailAddress("linus.torvalds@protonmail.org")):
         print(name.salutation) #Returns "Mr".
         print(name.firstname) #Returns "Linus".
@@ -141,7 +141,7 @@ Check if a name exists, is not made up or misspelled.
 from src.NameParser.parse import clsParseName
 
 try:
-    name = clsParseName(apiKey)
+    name = clsParseName('Your-API-key-here')
     if(name.validate("random_mnbas")):
         print(name.valid()) #Returns "bool(false)".
 except:
@@ -156,7 +156,7 @@ Additionally, the endpoint also generates a fictional email address and strong p
 from src.NameParser.generate import clsGenerateNames
 
 try:
-    names = clsGenerateNames(apiKey)
+    names = clsGenerateNames('Your-API-key-here')
     if(names.generate(5)):
         for name in names._list:
             print(name) #Returns five random names.
@@ -174,7 +174,7 @@ By using a combination of millions of first names and millions of last names we 
 from src.NameParser.extract import clsExtractNames
 
 try:
-    names = clsExtractNames(apiKey)
+    names = clsExtractNames('Your-API-key-here')
     if(names.extract("Veteran quarterback Philip Rivers moved ahead of Matteo Federica on the NFL's all-time passing list.")):
         for name in names._list:
             print(name) #Returns "Philip Rivers" and "Matteo Federica".
