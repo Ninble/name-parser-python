@@ -9,7 +9,7 @@ Homepage: <https://parser.name/>
 
 About
 ------------
-This Python project requires the packages **requests** and **ipaddress**.
+This Python 3 project requires the packages **requests** and **ipaddress**.
 These can be installed using the pip command.
 ```python
 $ python3 -m pip install requests
