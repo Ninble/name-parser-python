@@ -1,4 +1,4 @@
-# Name Parser Python
+# Name Parser for Python
 Your name contains a lot of information.
 It tells if you're male or female and reveals your nationality.
 Our service turns unstructured names into actionable information.
