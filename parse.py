@@ -1,4 +1,5 @@
-apiKey = "YOUR_API_KEY_HERE"
+# Get your API key on https://parser.name/
+apiKey = "Your-API-Key-Here"
 
 from src.NameParser.generate import clsGenerateNames
 
