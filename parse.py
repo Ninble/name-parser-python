@@ -1,4 +1,4 @@
-apiKey = "e05666adff6288e4a1e425e0c47f2e64"
+apiKey = "YOUR_API_KEY_HERE"
 
 from src.NameParser.generate import clsGenerateNames
 
