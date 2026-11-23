@@ -1,4 +1,4 @@
-# clsExtractNames
+# clsGenerateNames
 #
 # Parse a name into useful components.
 # This class is meant to integrate the Name Parser API into your Python project.

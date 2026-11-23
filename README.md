@@ -165,24 +165,6 @@ except:
     print("An exception occurred")
 ```
 
-Extract names from text
----------
-This endpoint extracts complete names from unstructured text very fast.
-By using a combination of millions of first names and millions of last names we can identify and extract complete names with an extremely high precision and accuracy.
-
-```python
-from src.NameParser.extract import clsExtractNames
-
-try:
-    names = clsExtractNames('Your-API-key-here')
-    if(names.extract("Veteran quarterback Philip Rivers moved ahead of Matteo Federica on the NFL's all-time passing list.")):
-        for name in names._list:
-            print(name) #Returns "Philip Rivers" and "Matteo Federica".
-            details=names.details(name) #Returns all data we have on the extracted name.
-except:
-    print("An exception occurred")
-```
-
 Do you have any questions about Name Parser?
 Do you have feature requests or suggestions to improve our service?
 Please reach out using our contact page.
