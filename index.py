@@ -1,5 +1,4 @@
 # These classes hold all functionality.
-from src.NameParser.extract import clsExtractNames
 from src.NameParser.generate import clsGenerateNames
 from src.NameParser.parse import clsParseName
 
@@ -32,12 +31,3 @@ if(names.generate(5)):
     for name in names._list:
         print(name) #Returns five random names.
         details=names.details(name) #Returns all details we have on the generated name.
-
-# Initialize the class that extracts names.
-names = clsExtractNames(apiKey)
-
-# Extract names from text.
-if(names.extract("Veteran quarterback Philip Rivers moved ahead of Matteo Federica on the NFL's all-time passing list.")):
-    for name in names._list:
-        print(name) #Returns "Philip Rivers" and "Matteo Federica".
-        details=names.details(name) #Returns all data we have on the extracted name.
