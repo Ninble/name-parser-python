@@ -1,96 +1,105 @@
 # clsGenerateNames
 #
-# Parse a name into useful components.
+# Generate random names with a fictional email address.
 # This class is meant to integrate the Name Parser API into your Python project.
 # This class contains all functionality of the "generate" endpoint which can be found on:
 # https://parser.name/api/generate-random-name/
+#
+# Version 2.0 (23 November 2026): the ip parameter, a fresh list for every request and per instance.
 
-import urllib.parse
+import ipaddress
 import requests
-from array import array
+
 
 class clsGenerateNames:
-    __apiKey = ""
-    _response = {}
-    _list = []
-    __remaining_hour = 250  # Default rate limit
-    __remaining_day = 250  # Default rate limit
 
     def __init__(self, apiKey) -> None:
-        if(apiKey == ""):
+        if apiKey == "":
             raise ValueError("Missing API key or API key is invalid.")
 
-        self.__apiKey = apiKey
+        self._apiKey = apiKey
+        self._response = {}
+        self._list = []
+        self._remaining_hour = 250  # Default rate limit
+        self._remaining_day = 250  # Default rate limit
 
-    def list(self) -> array:
+    def list(self) -> list:
         return self._list
 
-    def details(self, name) -> array:
+    def details(self, name) -> dict:
         return self._response[name]
 
-    def response(self) -> array:
+    def response(self) -> dict:
         return self._response
 
     def remainingHour(self) -> int:
-        return self.__remaining_hour
+        return self._remaining_hour
 
     def remainingDay(self) -> int:
-        return self.__remaining_day
+        return self._remaining_day
 
-    # This endpoint can generate random names for any given gender and country.
-    def generate(self, results=1, gender: str = "", country_code: str = "") -> bool:
+    # This endpoint can generate random names for any given gender and country. Without a country code the country
+    # of an IP address (IPv4 or IPv6) can be used.
+    def generate(self, results=1, gender: str = "", country_code: str = "", ip: str = "") -> bool:
 
-        # Create the URL with parameters depending on the input.
-        url = "https://api.parser.name/?api_key=" + self.__apiKey + "&endpoint=generate&results="+urllib.parse.quote_plus(str(results))
-        if(gender.lower() == "m" or gender.lower() == "f"):
-            url = url+"&gender="+urllib.parse.quote_plus(gender)
+        # Create the parameters depending on the input.
+        parameters = {"api_key": self._apiKey, "endpoint": "generate", "results": str(results)}
+        if gender.lower() in ("m", "f"):
+            parameters["gender"] = gender.lower()
+        if country_code != "" and self._validateCountryCode(country_code):
+            parameters["country_code"] = country_code
+        elif ip != "":
+            ipaddress.ip_address(ip)
+            parameters["ip"] = ip
 
-        if(country_code != "" and self._validateCountryCode(country_code) == True):
-            url = url+"&country_code="+urllib.parse.quote_plus(country_code)
+        return self._request(parameters)
 
-        return self._cUrl(url)
-
-    def _cUrl(self, url: str) -> bool:
+    def _request(self, parameters: dict) -> bool:
 
         # Execute API request.
-        response = requests.get(url)
+        response = requests.get("https://api.parser.name/", params=parameters, timeout=30)
 
         # Retrieve status code, header and body from response object.
         status_code = response.status_code
-        header = response.headers
-        json = response.json()
+        try:
+            json = response.json()
+        except ValueError:
+            json = {}
 
         # Heading contains information about rate limits.
-        self._processHeader(header)
+        self._processHeader(response.headers)
 
         # Process the response if possible.
-        if(status_code == 200):
+        if status_code == 200:
             if "data" in json:
                 self._processResponse(json["data"])
             else:
                 raise ValueError("Response is missing data.")
         else:
-            raise ValueError("API returned status code "+status_code+".")
+            message = "API returned status code " + str(status_code) + "."
+            if json.get("error"):
+                message = message + " " + str(json["error"])
+            raise ValueError(message)
 
         return True
 
     # Retrieve variables from API response and make it available in the class.
-    def _processResponse(self,response) -> None:
-            
-            for object in response:
-                name= object['name']['firstname']['name']+" "+object['name']['lastname']['name']
-                self._list.append(name)
-                self._response[name]=object
+    def _processResponse(self, response) -> None:
+        self._list = []
+        self._response = {}
+        for item in response:
+            name = item["name"]["firstname"]["name"] + " " + item["name"]["lastname"]["name"]
+            self._list.append(name)
+            self._response[name] = item
 
     # The headers of the API response contain rate limit information.
-    def _processHeader(self,header):
-        
-        for key,val in header.items():
-            if(key=="X-Requests-Remaining-Hour"):
-                self.__remaining_hour=int(val)
-            if(key=="X-Requests-Remaining-Day"):
-                self.__remaining_day=int(val)
+    def _processHeader(self, header) -> None:
+        if header.get("X-Requests-Remaining-Hour") is not None:
+            self._remaining_hour = int(header.get("X-Requests-Remaining-Hour"))
+        if header.get("X-Requests-Remaining-Day") is not None:
+            self._remaining_day = int(header.get("X-Requests-Remaining-Day"))
 
+    # Check if a given country code is valid.
     def _validateCountryCode(self,country_code) -> bool:
 
         country_codes={'Afghanistan' : 'AF',
@@ -370,3 +379,4 @@ class clsGenerateNames:
 
         if(country_code in country_codes.values()):
             return True
+        return False

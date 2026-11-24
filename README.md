@@ -1,169 +1,155 @@
 # Name Parser for Python
-Your name contains a lot of information.
-It tells if you're male or female and reveals your nationality.
-Our service turns unstructured names into actionable information.
-The name parser name parsing software splits a name or email address into the first and last name.
-We can tell if a persons name is male or female and what the possible nationality is.
+
+Name Parser for Python is a Python client for the [name parser API](https://parser.name/api/).
+It splits a full name or an email address into first name, middle names and surname.
+It returns the gender, the salutation, a letter salutation, titles, the suffix and the most likely country of a name.
 
 Homepage: <https://parser.name/>
 
-About
-------------
-This Python 3 project requires the packages **requests** and **ipaddress**.
-These can be installed using the pip command.
-```python
-$ python3 -m pip install requests
-$ python3 -m pip install ipaddress
-```
-The classes are located in the /src/NameParser/ folder and work seamlessly with our name parser API.
-Easily integrate the /NameParser/ folder into any new or existing python project.
-Each class contains the functionality for its endpoint from our API.
+## About
+
+This project works on Python 3.7 and above and needs the `requests` package (`pip install requests`).
+The classes are in the `/src/NameParser/` folder and each class contains the functionality of one API endpoint.
+Copy the `/src/NameParser/` folder into any new or existing Python project.
 
 API documentation: <https://parser.name/api/>
 
-API Key
------------
-To use the name parser classes you need to obtain an API Key.
-The API key gives you access to our API service.
-Register for a free account on our website.
-If the free account is does not contain sufficient requests you can upgrade to a payed subscription.
-When you initialize the class you must use your API key.
+## API key
+
+The classes need an API key, which gives access to the name parser API.
+Register for a free account on our website; paid subscriptions have higher limits.
 
 Get a free API key here: <https://parser.name/dashboard/>
 
-Examples of how to use this class
----------
-The following example will parse the name "Linus Benedict Torvalds".
-After it is being parsed you get access to all the components from the name.
-By providing the country code as an additional parameter the accuracy of the gender will be higher.
-You can also use an IP address.
-If you use the name parser on a contact or registration form you can pass the IP address of the visitor.
+## Parse a name
+
+The following example parses the name "Linus Benedict Torvalds" and returns its parts.
+
 ```python
 from src.NameParser.parse import clsParseName
 
 try:
     name = clsParseName('Your-API-key-here')
-    if (name.fromCompleteName("Linus Benedict Torvalds")):
-        print(name._gender) #Returns "m".
-except:
-    print("An exception occurred")
+    if name.fromCompleteName("Linus Benedict Torvalds"):
+        print(name.firstname())  # Returns "Linus".
+        print(name.middlenames())  # Returns ["Benedict"].
+        print(name.lastname())  # Returns "Torvalds".
+        print(name.suffix())  # Returns "", or "Jr." for "Martin Luther King Jr.".
+        print(name.titles())  # Returns [], or ["Prof.", "Dr."] for "Prof. Dr. Klaus Schmidt".
+except ValueError as e:
+    print("Exception:", e)
 ```
+
+A country code or the IP address of the person (IPv4 or IPv6) as second parameter makes the gender and country more accurate.
+
 ```python
-    //By providing the country code the accuracy of the gender will be higher. 
-    if (name.fromCompleteName("Linus Benedict Torvalds", "FI")):
+    if name.fromCompleteName("Linus Benedict Torvalds", "FI"):
         ...
-    }
 ```
+
+## Gender and salutation
+
+The gender comes from the first name in the country of the complete name.
+Our database holds millions of official first names with their gender, received from governments and statistics offices.
+
 ```python
-    //You can also use an IP address of the visitor to increase the accuracy.
-    if (name.fromCompleteName("Linus Benedict Torvalds", "91.157.455.57")) {
-        ...
-    }
+    if name.fromCompleteName("Linus Benedict Torvalds"):
+        print(name.gender())  # Returns "m".
+        print(name.genderFormatted())  # Returns "male".
+        print(name.salutation())  # Returns "Mr.".
 ```
 
-Split first and last name
----------
-The following example will parse the name "Linus Benedict Torvalds".
-After it is being parsed you can get all the components from the name.
-In this example you'll get the first, middle and lastname.
+## Letter salutation
+
+The letter salutation is the opening line of a formal email or letter in English, Dutch, German, French or Spanish.
+Without a language the country of the name decides.
+
 ```python
-from src.NameParser.parse import clsParseName
+    if name.fromCompleteName("Prof. Dr. Klaus Schmidt"):
+        print(name.letter())  # Returns "Sehr geehrter Herr Prof. Dr. Schmidt".
+        print(name.letterLanguage())  # Returns "de".
 
-try:
-    name = clsParseName('Your-API-key-here')
-    if (name.fromCompleteName("Linus Benedict Torvalds")):
-        print(name.firstname) #Returns "Linus".
-        print(name.middlename) #Returns "Benedict".
-        print(name.lastname) #Returns "Torvalds".
-except:
-    print("An exception occurred")
+    name.setLanguage("fr")
+    if name.fromCompleteName("Prof. Dr. Klaus Schmidt"):
+        print(name.letter())  # Returns "Monsieur le Professeur".
 ```
 
-Gender by name
----------
-We can tell a persons gender by looking at the first name.
-Our database holds millions of official first names and their gender
-We received this data from governments and statistical agencies.
+## Country and name area
+
+The country is the most likely country of origin of the name.
+The name area is the group of countries that share their names through a language, such as "English" or "Spanish".
+A name such as "Emma Wilson" is as common in Australia as in the United States, so the name area is more certain than the country.
+
 ```python
-from src.NameParser.parse import clsParseName
-
-try:
-    name = clsParseName('Your-API-key-here')
-    if (name.fromCompleteName("Linus Benedict Torvalds")):
-        print(name.gender) #Returns "m".
-        print(name.genderFormatted) #Returns "male".
-except:
-    print("An exception occurred")
+    if name.fromCompleteName("Emma Wilson"):
+        print(name.countryCode())  # Returns "GB".
+        print(name.countryCertainty())  # Returns 39.
+        print(name.nameArea())  # Returns "English".
+        print(name.nameAreaCertainty())  # Returns 73.
+        print(name.country())  # Returns "United Kingdom".
+        print(name.currency())  # Returns "GBP".
 ```
 
-Get Country and currency based upon name
----------
-Based upon the first name and last name we can predict the country of origin of any given name.
-For training data we used the names and country codes of tens of millions publicly available social media profiles.
-The following example will parse the name "Linus Benedict Torvalds" and return the country code, country and currency.
+A phone number in international form is a hint for the country, like an IP address.
+
 ```python
-from src.NameParser.parse import clsParseName
-
-try:
-    name = clsParseName('Your-API-key-here')
-    if (name.fromCompleteName("Linus Benedict Torvalds")):
-        print(name.countryCode) #Returns "SE".
-        print(name.country) #Returns "Sweden".
-        print(name.currency) #Returns "SEK".
-except:
-    print("An exception occurred")
+    name.setPhone("+61 2 9374 4000")
+    if name.fromCompleteName("Emma Wilson"):
+        print(name.countryCode())  # Returns "AU".
 ```
 
-Get the name from an email address
----------
-In many cases email addresses are based upon a persons name.
-Our service can extract the name from an email address and enrich it.
-We also return if the email address is a personal or a business email address.
+## Parse an email address
+
+Many email addresses are based on a name.
+The country domain of the address, such as .com.au or .de, is used as a hint for the country.
+
 ```python
-from src.NameParser.parse import clsParseName
-
-try:
-    name = clsParseName('Your-API-key-here')
-    if (name.fromEmailAddress("linus.torvalds@protonmail.org")):
-        print(name.salutation) #Returns "Mr".
-        print(name.firstname) #Returns "Linus".
-        print(name.lastname) #Returns "Torvalds".
-except:
-    print("An exception occurred")
+    if name.fromEmailAddress("linus.torvalds@protonmail.org"):
+        print(name.salutation())  # Returns "Mr.".
+        print(name.firstname())  # Returns "Linus".
+        print(name.lastname())  # Returns "Torvalds".
 ```
 
-Validate a complete name
----------
-Our database holds millions of first names and last names.
-Improve the quality of your database.
-Check if a name exists, is not made up or misspelled.
+## Validate a name
+
+Validation checks whether the first name exists and whether the name is in our list of famous, fictional and humorous names.
+A name the API cannot find is not valid.
+
 ```python
-from src.NameParser.parse import clsParseName
-
-try:
-    name = clsParseName('Your-API-key-here')
-    if(name.validate("random_mnbas")):
-        print(name.valid()) #Returns "bool(false)".
-except:
-    print("An exception occurred")
+    if name.validate("random_mnbas"):
+        print(name.valid())  # Returns False.
 ```
 
-Generate random names
----------
-This endpoint generates names by combining a random first name and a random last name for any given country code.
-Additionally, the endpoint also generates a fictional email address and strong password making it a great solution to create development databases.
+## Generate random names
+
+The generate endpoint combines a random first name and a random surname with a fictional email address, for development databases.
+Without a country code the country is random, or the country of an IP address.
+
 ```python
 from src.NameParser.generate import clsGenerateNames
 
 try:
     names = clsGenerateNames('Your-API-key-here')
-    if(names.generate(5)):
-        for name in names._list:
-            print(name) #Returns five random names.
-            details=names.details(name) #Returns all details we have on the generated name.
-except:
-    print("An exception occurred")
+    if names.generate(5, "f", "DE"):
+        for generated in names.list():
+            print(generated)  # Returns five random female names from Germany.
+            details = names.details(generated)  # Returns all details of the generated name.
+except ValueError as e:
+    print("Exception:", e)
 ```
+
+## Rate limits
+
+After every request `remainingHour()`, `remainingDay()` and `remainingMonth()` return the requests left in the current hour, day (free plan) or month (paid plans).
+
+## Changes in version 2.0 (November 2026)
+
+- New: `letter()`, `letterLanguage()`, `setLanguage()`, `titles()`, `suffix()`, `middlenames()`, `countryCertainty()`, `nameArea()`, `nameAreaCertainty()`, `setPhone()`, `remainingMonth()`.
+- IPv6 addresses as refine parameter, and an IP address for `generate()`.
+- `validate()` returns `valid()` False for a name the API cannot find, instead of an exception.
+- `nickname()` returns the nickname, `password()` returns a value (always "": the API no longer generates passwords), and an error message no longer fails with a TypeError.
+- Every instance has its own values, and a second request no longer keeps values of the first.
+- The extract class was removed: the extract endpoint was retired on 21 November 2026.
 
 Do you have any questions about Name Parser?
 Do you have feature requests or suggestions to improve our service?
