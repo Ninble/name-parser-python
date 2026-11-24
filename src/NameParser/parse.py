@@ -232,7 +232,7 @@ class clsParseName:
         self._salutation = salutation.get("salutation") or ""
         self._letter = salutation.get("letter") or ""
         self._letter_language = salutation.get("letter_language") or ""
-        self._titles = [title.get("abbriviation") for title in (response.get("titles") or []) if title.get("abbriviation")]
+        self._titles = [title.get("abbreviation") or title.get("abbriviation") for title in (response.get("titles") or []) if title.get("abbreviation") or title.get("abbriviation")]
         self._firstname = firstname.get("name") or ""
         self._middlenames = [middle.get("name") for middle in (name.get("middlenames") or []) if middle.get("name")]
         self._nickname = name.get("nickname") or ""
